@@ -1,3 +1,11 @@
+# ラズパイ＋電子ペーパーで**フォトフレーム ディスプレー**(時刻、天気、カレンダー、予定表)
+準備するもの
+- [Raspberry Pi Zero 2 WH](https://amzn.to/44UxA1P)
+- [Waveshare ePaper 7.5 Inch HAT](https://amzn.to/4qunFrT)
+- 起動用micro sdメモリ
+- 電源供給用micro USBケーブル
+- フォトフレーム18x13cm（百均サイズ）
+ 
 ![screen-output](screenshots/screen-output.png)
 ![screen-output2](screenshots/screen-output2.png)
 
@@ -9,12 +17,12 @@ I've made the following modifications:
 4. Japanese adaptation for date format and AccuWeather description: LANG=ja_JP.utf8
 
 ## purchase
-https://amzn.to/44UxA1P
-https://amzn.to/4qunFrT
+- [Raspberry Pi Zero 2 WH](https://amzn.to/44UxA1P)
+- [Waveshare ePaper 7.5 Inch HAT](https://amzn.to/4qunFrT)
 
 ## installation
 The original procedure was not fully compatible with the Raspberry Pi Zero 2 WH. 
-
+I used Raspberry Pi Imager v2.0.3 for Windows.
 ```
 git clone --recursive https://github.com/takyaO/waveshare-epaper-display.git  
 cd waveshare-epaper-display  
@@ -30,8 +38,6 @@ pip install pytz astral humanize emoji caldav google_auth_oauthlib google-api-py
 ```
 export ACCUWEATHER_APIKEY=xxxxxxxxxxxxxxxxxxxxx
 export ACCUWEATHER_LOCATIONKEY=226090
-export WEATHER_LATITUDE=34.7144192
-export WEATHER_LONGITUDE=137.7140736
 export WEATHER_FORMAT=CELSIUS
 
 export CALDAV_CALENDAR_URLS="
