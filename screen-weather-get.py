@@ -4,16 +4,24 @@ import datetime
 import sys
 import os
 import logging
+import locale # 追加
 from weather_providers import climacell, openweathermap, metofficedatahub, metno, meteireann, accuweather, visualcrossing, weathergov, smhi
 from alert_providers import metofficerssfeed, weathergovalerts
 from alert_providers import meteireann as meteireannalertprovider
 from utility import get_formatted_time, update_svg, configure_logging, configure_locale
 import textwrap
 import html
+import urllib.parse
 
 configure_locale()
 configure_logging()
 
+def get_active_locale():
+    """現在の環境の言語コード(ja, en等)を返す"""
+    try:
+        return locale.getlocale()[0][:2]
+    except:
+        return "en"
 
 def format_weather_description(weather_description):
     if len(weather_description) < 20:
@@ -24,7 +32,6 @@ def format_weather_description(weather_description):
     weather_dict = {1: splits[0]}
     weather_dict[2] = splits[1] if len(splits) > 1 else ''
     return weather_dict
-
 
 def get_weather(location_lat, location_long, units):
 
@@ -57,7 +64,6 @@ def get_weather(location_lat, location_long, units):
     if visualcrossing_apikey:
         logging.info("Getting weather from Visual Crossing")
         weather_provider = visualcrossing.VisualCrossing(visualcrossing_apikey, location_lat, location_long, units)
-
     elif use_met_eireann:
         logging.info("Getting weather from Met Eireann")
         weather_provider = meteireann.MetEireann(location_lat, location_long, units)
@@ -76,7 +82,6 @@ def get_weather(location_lat, location_long, units):
                                                    location_long,
                                                    accuweather_locationkey,
                                                    units)
-
     elif metoffice_apikey:
         logging.info("Getting weather from Met Office Weather Datahub")
         weather_provider = metofficedatahub.MetOffice(metoffice_apikey,
@@ -103,10 +108,8 @@ def get_weather(location_lat, location_long, units):
     logging.info("weather - {}".format(weather))
     return weather
 
-
 def format_alert_description(alert_message):
     return html.escape(alert_message)
-
 
 def get_alert_message(location_lat, location_long):
     alert_message = ""
@@ -132,9 +135,7 @@ def get_alert_message(location_lat, location_long):
     logging.info("alert - {}".format(alert_message))
     return alert_message
 
-
 def main():
-
     template_name = os.getenv("SCREEN_LAYOUT", "1")
     location_lat = os.getenv("WEATHER_LATITUDE", "51.5077")
     location_long = os.getenv("WEATHER_LONGITUDE", "-0.1277")
@@ -154,15 +155,30 @@ def main():
         return
 
     weather_desc = format_weather_description(weather["description"])
-
     alert_message = get_alert_message(location_lat, location_long)
     alert_message = format_alert_description(alert_message)
 
-    time_now = get_formatted_time(datetime.datetime.now())
+    today = datetime.datetime.now()
+    time_now = today.strftime("%H:%M") 
+
     time_now_font_size = "100px"
 
     if len(time_now) > 6:
         time_now_font_size = str(100 - (len(time_now)-5) * 5) + "px"
+
+    today = datetime.datetime.now()
+    lang = get_active_locale()
+
+    if lang == "ja":
+        day_one_format = "%-m月 %-d日"  # 1月 2日
+        day_name_format = "%A"         # 金曜日
+        hour_now_format = "%H:%M"      # 13:00 (24時間制が一般的)
+    else:
+        day_one_format = "%b %-d"      # Jan 2
+        day_name_format = "%A"         # Friday
+  #      hour_now_format = "%-I %p"     # 1 PM
+        hour_now_format = "%H:%M"     # HH:MM
+    # ----------------------------
 
     output_dict = {
         'LOW_ONE': "{}{}".format(str(round(weather['temperatureMin'])), degrees),
@@ -172,15 +188,14 @@ def main():
         'WEATHER_DESC_2': weather_desc[2],
         'TIME_NOW_FONT_SIZE': time_now_font_size,
         'TIME_NOW': time_now,
-        'HOUR_NOW': datetime.datetime.now().strftime("%-I %p"),
-        'DAY_ONE': datetime.datetime.now().strftime("%b %-d, %Y"),
-        'DAY_NAME': datetime.datetime.now().strftime("%A"),
+        'HOUR_NOW': today.strftime(hour_now_format),
+        'DAY_ONE': today.strftime(day_one_format),
+        'DAY_NAME': today.strftime(day_name_format),
         'ALERT_MESSAGE_VISIBILITY': "visible" if alert_message else "hidden",
         'ALERT_MESSAGE': alert_message
     }
 
     logging.info(output_dict)
-
     logging.info("Updating SVG")
 
     template_svg_filename = f'screen-template.{template_name}.svg'
