@@ -1,21 +1,13 @@
-
-import pickle
 import caldav
-from utility import is_stale
-import os
 import logging
-import datetime
 from .base_provider import BaseCalendarProvider, CalendarEvent
-
-
-ttl = float(os.getenv("CALENDAR_TTL", 1 * 60 * 60))
+from datetime import datetime, date, time, timezone, timedelta
 
 
 class CalDavCalendar(BaseCalendarProvider):
 
-    def __init__(self, calendar_url, calendar_id, max_event_results, from_date, to_date, username=None, password=None):
-        self.calendar_url = calendar_url
-        self.calendar_id = calendar_id
+    def __init__(self, calendar_urls, max_event_results, from_date, to_date, username=None, password=None):
+        self.calendar_urls = calendar_urls
         self.max_event_results = max_event_results
         self.username = username
         self.password = password
@@ -24,50 +16,63 @@ class CalDavCalendar(BaseCalendarProvider):
 
     def get_calendar_events(self):
 
-        caldav_calendar_pickle = 'cache_caldav.pickle'
-        calendar_events: list[CalendarEvent] = []
+        events_data = []
+        calendar_events = []
 
-        if is_stale(os.getcwd() + "/" + caldav_calendar_pickle, ttl):
-            logging.debug("Pickle is stale, fetching Caldav Calendar")
+        # ★ 最初のURLを base URL として使う（重要）
+        base_url = self.calendar_urls[0]
 
-            with caldav.DAVClient(url=self.calendar_url, username=self.username, password=self.password) as client:
-                my_principal = client.principal()
+        with caldav.DAVClient(
+            url=base_url,
+            username=self.username,
+            password=self.password
+        ) as client:
 
-                calendar = my_principal.calendar(cal_id=self.calendar_id)
-                event_results = calendar.date_search(start=self.from_date, end=self.to_date, expand=True)
-                events_data = []
+            for url in self.calendar_urls:
+                logging.info(f"Fetching CalDAV calendar: {url}")
 
-                for result in event_results:
+                calendar = caldav.Calendar(client, url=url)
+
+                results = calendar.date_search(
+                    start=self.from_date,
+                    end=self.to_date,
+                    expand=True
+                )
+
+                for result in results:
                     for component in result.icalendar_instance.subcomponents:
-                        events_data.append(component)
+                        if 'DTSTART' in component:
+                            events_data.append(component)
 
-            # Sort by start date. Since some are dates, and some are datetimes, a simple string sort works
-            events_data.sort(key=lambda x: str(x['DTSTART'].dt))
+        def normalize_dt(dt):
+            if isinstance(dt, datetime):
+                return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+            return datetime.combine(dt, time.min, tzinfo=timezone.utc)
 
-            for event in events_data[0:self.max_event_results]:
+        events_data.sort(key=lambda x: normalize_dt(x['DTSTART'].dt))
 
-                # If a dtend isn't included, calculate it from the duration
-                if 'DTEND' in event:
-                    event_end = event['DTEND'].dt
-                if 'DURATION' in event:
-                    event_end = event['DTSTART'].dt + event['DURATION'].dt
+        for event in events_data[:self.max_event_results]:
+            start = event['DTSTART'].dt
 
-                all_day_event = False
-                # CalDav Calendar marks the 'end' of all-day-events as
-                # the day _after_ the last day. eg, Today's all day event ends tomorrow!
-                # So subtract a day, if the event is an all day event
-                if type(event_end) == datetime.date:
-                    event_end = event_end - datetime.timedelta(days=1)
-                    all_day_event = True
+            if 'DTEND' in event:
+                end = event['DTEND'].dt
+            elif 'DURATION' in event:
+                end = start + event['DURATION'].dt
+            else:
+                end = start
 
-                calendar_events.append(CalendarEvent(str(event['SUMMARY']), event['DTSTART'].dt, event_end, all_day_event))
+            all_day = isinstance(start, date) and not isinstance(start, datetime)
+            if all_day:
+                end = end - timedelta(days=1)
 
-            with open(caldav_calendar_pickle, 'wb') as cal:
-                pickle.dump(calendar_events, cal)
+            calendar_events.append(
+                CalendarEvent(
+                    str(event.get('SUMMARY', '')),
+                    start,
+                    end,
+                    all_day
+                )
+            )
 
-            return calendar_events
-        else:
-            logging.info("Found in cache")
-            with open(caldav_calendar_pickle, 'rb') as cal:
-                calendar_events = pickle.load(cal)
-                return calendar_events
+        return calendar_events
+

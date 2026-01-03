@@ -1,6 +1,6 @@
 import logging
+import os
 from weather_providers.base_provider import BaseWeatherProvider
-
 
 class AccuWeather(BaseWeatherProvider):
     def __init__(self, accuweather_apikey, location_lat, location_long, location_key, units):
@@ -10,10 +10,17 @@ class AccuWeather(BaseWeatherProvider):
         self.location_key = location_key
         self.units = units
 
+        lang_env = os.getenv("LANG", "").lower()
+        if lang_env.startswith("ja"):
+            self.language = "ja-jp"
+        else:
+            self.language = "en-us"
+
     # Map Accuweather icons to local icons
     # Reference: https://developer.accuweather.com/weather-icons
-    def get_icon_from_accuweather_weathercode(self, weathercode, is_daytime):
-
+#    def get_icon_from_accuweather_weathercode(self, weathercode, is_daytime):
+    def get_icon_from_accuweather_weathercode(self, weathercode):
+        is_daytime = weathercode <= 32
         icon_dict = {
                         1: "clear_sky_day" if is_daytime else "clearnight",  # Day - Sunny
                         2: "clear_sky_day" if is_daytime else "clearnight",  # Day - Mostly Sunny
@@ -68,20 +75,24 @@ class AccuWeather(BaseWeatherProvider):
     # https://developer.accuweather.com/accuweather-forecast-api/apis/get/forecasts/v1/daily/1day/%7BlocationKey%7D
     def get_weather(self):
 
-        url = ("http://dataservice.accuweather.com/forecasts/v1/daily/1day/{}?apikey={}&details=true&metric={}"
-               .format(self.location_key, self.accuweather_apikey, "true" if self.units == "metric" else "false"))
+        url = ("http://dataservice.accuweather.com/forecasts/v1/daily/1day/{}?apikey={}&details=true&metric={}&language={}"
+        ).format(
+            self.location_key, self.accuweather_apikey, "true" if self.units == "metric" else "false", self.language
+        )
 
         response_data = self.get_response_json(url)
         weather_data = response_data
         logging.debug("get_weather() - {}".format(weather_data))
 
-        daytime = self.is_daytime(self.location_lat, self.location_long)
-        accuweather_icon = weather_data["DailyForecasts"][0]["Day"]["Icon"] if daytime else weather_data["DailyForecasts"][0]["Night"]["Icon"]
+#        daytime = self.is_daytime(self.location_lat, self.location_long)
+#        accuweather_icon = weather_data["DailyForecasts"][0]["Day"]["Icon"] if daytime else weather_data["DailyForecasts"][0]["Night"]["Icon"]
+        accuweather_icon = weather_data["DailyForecasts"][0]["Day"]["Icon"]
         # { "temperatureMin": "2.0", "temperatureMax": "15.1", "icon": "mostly_cloudy", "description": "Cloudy with light breezes" }
         weather = {}
         weather["temperatureMin"] = weather_data["DailyForecasts"][0]["Temperature"]["Minimum"]["Value"]
         weather["temperatureMax"] = weather_data["DailyForecasts"][0]["Temperature"]["Maximum"]["Value"]
-        weather["icon"] = self.get_icon_from_accuweather_weathercode(accuweather_icon, daytime)
-        weather["description"] = weather_data["DailyForecasts"][0]["Day"]["ShortPhrase"] if daytime else weather_data["DailyForecasts"][0]["Night"]["ShortPhrase"]
+#        weather["icon"] = self.get_icon_from_accuweather_weathercode(accuweather_icon, daytime)
+        weather["icon"] = self.get_icon_from_accuweather_weathercode(accuweather_icon)
+        weather["description"] = weather_data["DailyForecasts"][0]["Day"]["ShortPhrase"]
         logging.debug(weather)
         return weather

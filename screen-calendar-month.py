@@ -1,5 +1,6 @@
 import datetime
 import calendar
+import os
 from utility import update_svg, configure_locale, configure_logging
 import locale
 import babel
@@ -10,59 +11,93 @@ import drawsvg as draw
 configure_logging()
 configure_locale()
 
-try:
-    babel_locale = babel.Locale(locale.getlocale()[0])
-    logging.debug(babel_locale)
-except babel.core.UnknownLocaleError:
-    logging.error("Could not get locale from environment. Using default locale.")
-    babel_locale = babel.Locale("")
+def get_safe_babel_locale():
+    """環境変数やシステム設定から安全にBabelロケールを取得する"""
+    # 1. 環境変数を直接チェック
+    env_lang = os.getenv("LANG", "en_US.UTF-8").split('.')[0]
+    
+    try:
+        return babel.Locale.parse(env_lang)
+    except (babel.core.UnknownLocaleError, ValueError):
+        try:
+            # 2. localeモジュールから試行
+            loc = locale.getlocale()[0]
+            if loc:
+                return babel.Locale.parse(loc)
+        except:
+            pass
+    
+    # 3. 最終手段：デフォルトを英語にする
+    logging.warning("Fallback to default locale 'en_US'")
+    return babel.Locale.parse("en_US")
 
+# エラーが出ていた箇所をこの関数に置き換え
+babel_locale = get_safe_babel_locale()
+logging.debug(f"Using Babel locale: {babel_locale}")
 
 def main():
     logging.info("Generating SVG for calendar month")
-
-    # Python does not know about the locale's first day of week 🤦  https://stackoverflow.com/a/4265852/974369
-    # Use babel to set it instead
     calendar.setfirstweekday(babel_locale.first_week_day)
 
-    now = datetime.datetime.now()
+    # タイムゾーンを考慮した「今日」の取得（昨日が混ざるバグを防止）
+    now = datetime.datetime.now().astimezone()
     current_year, current_month, current_day = now.year, now.month, now.day
-
-    # Get this month's calendar as a matrix
     cal = calendar.monthcalendar(current_year, current_month)
 
-    # Create a new SVG drawing
-    dwg = draw.Drawing(width=500, height=500, origin=(0,0),  id='month-cal', transform='translate(500, 240)')
-
+    # 元のサイズ設定に戻しました
     cell_width = 40
     cell_height = 30
+    font_size_val = 26 # お好みのサイズに調整してください
 
-    # Have the day abbreviations respect the locale's first day of the week
+    dwg_width = cell_width * 7
+    dwg_height = cell_height * (len(cal) + 1)
+    
+    dwg = draw.Drawing(width=dwg_width, height=dwg_height, id='month-cal-inner')
+
     day_abbr = deque(list(calendar.day_abbr))
     day_abbr.rotate(-calendar.firstweekday())
 
-    # Header for days of the week
+    # 曜日ヘッダー（元の座標 y=20）
     for i, day in enumerate(day_abbr):
-        dwg.append(draw.Text(day[:2], font_size=None, x=i*cell_width + 20, y= 20, fill='black' ))
+        dwg.append(draw.Text(day[:2], font_size=font_size_val * 0.6, 
+                             x=i*cell_width + 20, y=20, 
+                             text_anchor='middle', fill='black'))
 
-    # Days of the month per week
+    # 日付（元の座標計算 y=(i+2)*cell_height - 10）
     for i, week in enumerate(cal):
         for j, day in enumerate(week):
-            if day != 0:  # calendar.monthcalendar pads with 0s
+            if day != 0:
                 text_fill = 'black'
+                weight = 'normal'
+
+                # 元の計算式に基づいた座標
+                center_x = j * cell_width + 20
+                center_y = (i + 2) * cell_height - 10
+
                 if day == current_day:
-                    text_fill = 'red'
-                text = draw.Text(str(day), font_size=None, x=j*cell_width + 20, y=(i+2)*cell_height - 10, width=cell_width, height=cell_height, fill=text_fill)
-                dwg.append(text)
+                    # 今日を黒丸白抜きで強調
+                    # 元の座標 y から少し上にずらすと数字が中央に見えます
+                    circle_y = center_y - 8 
+                    dwg.append(draw.Circle(center_x, circle_y, 14, fill='black'))
+                    text_fill = 'white'
+                    weight = 'bold'
+                
+                dwg.append(draw.Text(
+                    str(day), 
+                    font_size=font_size_val, 
+                    x=center_x, 
+                    y=center_y, 
+                    text_anchor='middle',
+                    font_weight=weight,
+                    fill=text_fill
+                ))
 
     svg_output = dwg.as_svg()
-    # Remove the <?xml> line
-    svg_output = svg_output.split('\n', 1)[1]
+    if '\n' in svg_output:
+        svg_output = svg_output.split('\n', 1)[1]
 
     output_svg_filename = 'screen-output-weather.svg'
     output_dict = {'MONTH_CAL': svg_output}
-    logging.info("main() - {}".format(output_dict))
-    logging.info("Updating SVG")
     update_svg(output_svg_filename, output_svg_filename, output_dict)
 
 if __name__ == "__main__":

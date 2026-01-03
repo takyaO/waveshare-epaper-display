@@ -1,3 +1,60 @@
+![screen-output](screen-output.png)
+![screen-output2](screen-output2.png)
+
+# About this fork
+I've made the following modifications: 
+1. Import MULTIPLE caldav (owncloud) calendars: CALDAV_CALENDAR_URLS
+2. Fixes for caldav (owncloud) features
+3. A new layout with a b/w calendar: SCREEN_LAYOUT=6
+4. Japanese adaptation for date format and AccuWeather description: LANG=ja_JP.utf8
+
+## purchase
+https://amzn.to/44UxA1P
+https://amzn.to/4qunFrT
+
+## installation
+The original procedure was not fully compatible with the Raspberry Pi Zero 2 WH. 
+
+```
+git clone --recursive https://github.com/takyaO/waveshare-epaper-display.git  
+cd waveshare-epaper-display  
+sudo apt install python3-lxml python3-pillow
+python3 -m venv .venv --system-site-packages
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install pytz astral humanize emoji caldav google_auth_oauthlib google-api-python-client icalevents msal cairosvg drawsvg
+```
+
+## env.sh
+
+```
+export ACCUWEATHER_APIKEY=xxxxxxxxxxxxxxxxxxxxx
+export ACCUWEATHER_LOCATIONKEY=226090
+export WEATHER_LATITUDE=34.7144192
+export WEATHER_LONGITUDE=137.7140736
+export WEATHER_FORMAT=CELSIUS
+
+export CALDAV_CALENDAR_URLS="
+http://x.y.z.w/owncloud/remote.php/dav/calendars/xxxxx/personal/
+http://x.y.z.w/owncloud/remote.php/dav/calendars/xxxxx/-/
+http://x.y.z.w/owncloud/remote.php/dav/calendars/xxxxx/--1/
+http://x.y.z.w/owncloud/remote.php/dav/calendars/xxxxx/--2/
+"
+export CALDAV_USERNAME=xxxxxxxxx
+export CALDAV_PASSWORD=xxxxxxxxx
+
+export WAVESHARE_EPD75_VERSION=2
+
+export SCREEN_LAYOUT=6
+export LANG=ja_JP.utf8
+#export LANG=en_US.utf8
+```
+
+
+## run
+./run.sh
+
+----
 Instructions on setting up a Raspberry Pi Zero WH with a Waveshare ePaper 7.5 Inch HAT.
 The screen will display date, time, weather icon with high and low, and calendar entries.
 

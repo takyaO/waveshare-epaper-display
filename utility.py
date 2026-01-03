@@ -152,41 +152,48 @@ def get_formatted_time(dt):
         formatted_time = dt.strftime("%-I:%M %p")
     return formatted_time
 
+def get_active_locale():
+    # 1. LANG 環境変数から取得
+    lang_env = os.getenv("LANG")
+    if lang_env:
+        return lang_env.split("_")[0]  # ja_JP.utf8 → ja
+    # 2. LC_TIME
+    loc = locale.getlocale(locale.LC_TIME)[0]
+    if loc:
+        return loc.split("_")[0]
+    return "en"
 
 def get_formatted_date(dt, include_time=True):
     today = datetime.datetime.today()
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
     next_week = today + datetime.timedelta(days=7)
-    formatter_day = "%a %b %-d"
 
-    # Display the time in the locale format, if possible
-    if include_time:
-        formatted_time = get_formatted_time(dt)
+    lang = get_active_locale()
+
+    if lang == "ja":
+        formatter_day = "%A %-m月 %-d日"  #  金曜日 1月 2日
     else:
-        formatted_time = " "
+        formatter_day = "%a %b %-d"      #  Fri Jan 2
+
+    formatted_time = get_formatted_time(dt) if include_time else ""
 
     try:
-        short_locale = locale.getlocale()[0]  # en_GB
-        short_locale = short_locale.split("_")[0]  # en
-        if not short_locale == "en":
-            humanize.activate(short_locale)
+        if lang != "en":
+            humanize.activate(lang)
         has_locale = True
     except Exception:
-        logging.debug("Locale not found for humanize")
         has_locale = False
 
-    if (has_locale and
-            (dt.date() == today.date()
-             or dt.date() == tomorrow.date()
-             or dt.date() == yesterday.date())):
-        # Show today/tomorrow/yesterday if available
-        formatter_day = humanize.naturalday(dt.date(), "%A").title()
-    elif dt.date() < next_week.date():
-        # Just show the day name if it's in the next few days
-        formatter_day = "%A"
-    return dt.strftime(formatter_day + " " + formatted_time)
+    if has_locale and dt.date() in {today.date(), tomorrow.date(), yesterday.date()}:
+        return humanize.naturalday(dt.date(), "%A").title()
 
+    if dt.date() < next_week.date():
+        return dt.strftime("%A")
+
+    return dt.strftime(
+        formatter_day + (" " + formatted_time if formatted_time else "")
+    )
 
 def get_sunset_time():
     """

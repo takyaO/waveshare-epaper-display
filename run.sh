@@ -42,7 +42,7 @@ else
     fi
 
     # Only layout 5 shows a calendar, so save a few seconds.
-    if [[ "$SCREEN_LAYOUT" -eq 5 ]]; then
+    if [[ "$SCREEN_LAYOUT" -ge 5 ]]; then
         log "Add Calendar month"
         if ! .venv/bin/python3 screen-calendar-month.py; then
             log "⚠️Error getting calendar month info, stopping."
@@ -65,7 +65,7 @@ else
 
     log "Export to PNG"
 
-    .venv/bin/cairosvg -o screen-output.png -f png --dpi 300 --output-width $WAVESHARE_WIDTH --output-height $WAVESHARE_HEIGHT screen-output-weather.svg
+    .venv/bin/cairosvg --unsafe -o screen-output.png -f png --dpi 300 --output-width $WAVESHARE_WIDTH --output-height $WAVESHARE_HEIGHT screen-output-weather.svg
 
     log "Display on screen"
 
