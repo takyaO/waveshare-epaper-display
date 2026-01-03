@@ -38,6 +38,8 @@ pip install pytz astral humanize emoji caldav google_auth_oauthlib google-api-py
 ```
 export ACCUWEATHER_APIKEY=xxxxxxxxxxxxxxxxxxxxx
 export ACCUWEATHER_LOCATIONKEY=226090
+export WEATHER_LATITUDE=34.7144192
+export WEATHER_LONGITUDE=137.7140736 
 export WEATHER_FORMAT=CELSIUS
 
 export CALDAV_CALENDAR_URLS="
