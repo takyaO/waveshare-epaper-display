@@ -1,5 +1,5 @@
-![screen-output](screen-output.png)
-![screen-output2](screen-output2.png)
+![screen-output](screenshots/screen-output.png)
+![screen-output2](screenshots/screen-output2.png)
 
 # About this fork
 I've made the following modifications: 
