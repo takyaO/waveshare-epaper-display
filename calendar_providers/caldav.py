@@ -65,12 +65,19 @@ class CalDavCalendar(BaseCalendarProvider):
             if all_day:
                 end = end - timedelta(days=1)
 
+            summary = str(event.get('SUMMARY', ''))
+
+            location = ""
+            if 'LOCATION' in event:
+                location = str(event.get('LOCATION'))
+
             calendar_events.append(
                 CalendarEvent(
-                    str(event.get('SUMMARY', '')),
+                    summary,
                     start,
                     end,
-                    all_day
+                    all_day,
+                    location
                 )
             )
 

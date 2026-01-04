@@ -91,7 +91,23 @@ def get_formatted_calendar_events(fetched_events: list[CalendarEvent]) -> dict:
 
             formatted_events['CAL_DATETIME_' + event_label_id] = dt_str_full
             formatted_events['CAL_DATETIME_START_' + event_label_id] = dt_str_start
+
+            location = getattr(event, "location", "")
+            dt_str_full = get_datetime_formatted(
+                event.start, event.end, event.all_day_event
+            )
+            dt_str_start = get_datetime_formatted(
+                event.start, event.end, event.all_day_event, start_only=True
+            )
+
+            if location:
+                dt_str_full += " @ " + location
+                dt_str_start += " @ " + location
+
+            formatted_events['CAL_DATETIME_' + event_label_id] = dt_str_full
+            formatted_events['CAL_DATETIME_START_' + event_label_id] = dt_str_start
             formatted_events['CAL_DESC_' + event_label_id] = event.summary
+            
         else:
             formatted_events['CAL_DATETIME_' + event_label_id] = ""
             formatted_events['CAL_DATETIME_START_' + event_label_id] = ""
