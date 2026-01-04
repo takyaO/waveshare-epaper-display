@@ -5,8 +5,10 @@
 - 起動用micro sdメモリ
 - 電源供給用micro USBケーブル
 - フォトフレーム18x13cm（百均サイズ）
+
 メリット
 - 低電力（モバイルバッテリー駆動可）
+
 デメリット
 - ePaperが高価
 ![screen-output](screenshots/screen-output.png)
