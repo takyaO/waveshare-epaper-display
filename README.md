@@ -5,7 +5,10 @@
 - 起動用micro sdメモリ
 - 電源供給用micro USBケーブル
 - フォトフレーム18x13cm（百均サイズ）
- 
+メリット
+- 低電力（モバイルバッテリー駆動可）
+デメリット
+- ePaperが高価
 ![screen-output](screenshots/screen-output.png)
 ![screen-output2](screenshots/screen-output2.png)
 
@@ -21,8 +24,7 @@ I've made the following modifications:
 - [Waveshare ePaper 7.5 Inch HAT](https://amzn.to/4qunFrT)
 
 ## installation
-The original procedure was not fully compatible with the Raspberry Pi Zero 2 WH. 
-I used Raspberry Pi Imager v2.0.3 for Windows.
+The original procedure was not fully compatible with the Raspberry Pi Zero 2 WH. I installed Pi OS Lite (64bit) using Imager v2.0.3 for Windows. 
 ```
 git clone --recursive https://github.com/takyaO/waveshare-epaper-display.git  
 cd waveshare-epaper-display  

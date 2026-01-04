@@ -41,7 +41,7 @@ def get_datetime_formatted(event_start, event_end, is_all_day_event, start_only=
     lang = get_active_locale()
 
     if lang == "ja":
-        label_today = "本日"
+        label_today = "今日"
         label_tomorrow = "明日"
         formatter_day = "%-m月%-d日(%a)" # 1月2日(金)
     else:
@@ -53,12 +53,20 @@ def get_datetime_formatted(event_start, event_end, is_all_day_event, start_only=
     today = now_dt.date()
     tomorrow = today + datetime.timedelta(days=1)
 
-    if is_all_day_event or (isinstance(event_start, datetime.date) and not isinstance(event_start, datetime.datetime)):
-        start = datetime.datetime.combine(event_start, datetime.time.min)
-        start_day_str = start.strftime(formatter_day)
-        return start_day_str
-    
-    # 通常イベント
+    if is_all_day_event or (
+        isinstance(event_start, datetime.date)
+        and not isinstance(event_start, datetime.datetime)
+    ):
+        start_date = event_start
+        if start_date == today:
+            return label_today
+        elif start_date == tomorrow:
+            return label_tomorrow
+        else:
+            return datetime.datetime.combine(
+                start_date, datetime.time.min
+            ).strftime(formatter_day)
+        
     start_dt = event_start.astimezone()
     end_dt = event_end.astimezone()
 
