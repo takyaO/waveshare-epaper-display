@@ -12,10 +12,9 @@
          <path style="fill:#000000" d="m 397.281,132.088 c 8.74,0 15.891,-7.119 15.891,-15.891 V 15.891 C 413.172,7.119 406.021,0 397.281,0 388.541,0 381.39,7.119 381.39,15.891 v 100.306 c 0,8.772 7.151,15.891 15.891,15.891 z" id="path136" inkscape:connector-curvature="0" />
       </g>
    </defs>
-
-   <text id="text3145" x="20" y="105" font-size="100px" style="font-weight:bold;font-size:100px;line-height:0%;font-family:sans-serif;fill:#000000;font-style:normal;font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;">
-      <tspan sodipodi:role="line" id="tspan82">TIME_NOW</tspan>
-   </text>
+<text id="text3145" x="20" y="105" font-size="TIME_NOW_FONT_SIZE" style="font-weight:bold; font-family:sans-serif; fill:#000000; text-anchor:start;">
+   <tspan id="tspan82">TIME_NOW</tspan>
+</text>
 
    <g transform="scale(1.2) translate(525 5)" id="g3127">
       <use href="icons/ICON_ONE.svg" id="use3129" />
@@ -65,9 +64,12 @@
       <tspan style="font-weight:bold;font-family:sans-serif;font-style:normal;font-stretch:normal;font-variant:normal;font-size:25px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;" x="110" id="tspan73" dy="25">CAL_DESC_4</tspan>
    </text>
 
-
-   <text id="text3159-2" x="682" y="190" font-size="38px" style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:22px;line-height:0%;font-family:sans-serif;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle">WEATHER_DESC_1</text>
-   <text id="text3159-2-8" x="683" y="225" font-size="38px" style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:22px;line-height:0%;font-family:sans-serif;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle">WEATHER_DESC_2</text>
+<text id="text3159-2" x="780" y="195" font-size="22px" style="font-weight:bold; font-family:sans-serif; text-anchor:end; fill:#000000;">
+    WEATHER_DESC_1
+</text>
+<text id="text3159-2-8" x="780" y="230" font-size="22px" style="font-weight:bold; font-family:sans-serif; text-anchor:end; fill:#000000;">
+    WEATHER_DESC_2
+</text>
 
    <use id="customdata" href="screen-output-custom-temp.svg" />
 
