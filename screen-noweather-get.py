@@ -18,15 +18,6 @@ def get_active_locale():
         return "en"
 
 
-def calc_event_positions(event_limit, top_y, date_to_desc, block_gap):
-    y = top_y
-    pos = []
-    for _ in range(event_limit):
-        pos.append((y, y + date_to_desc))
-        y += date_to_desc + block_gap
-    return pos, y
-
-
 def main():
     template_name = os.getenv("SCREEN_LAYOUT", "7")
 
@@ -34,51 +25,51 @@ def main():
     lang = get_active_locale()
 
     # =========================
-    # レイアウト定数
+    # 支配パラメータ
     # =========================
-    BASE_EVENT = 4
-    MAX_EVENT = 6
-    MAX_TODO = 3
-
-    EVENT_DATE_TO_DESC = 26
-    EVENT_BLOCK_GAP = 24
-
-    TODO_DATE_TO_DESC = 24
-    TODO_BLOCK_GAP = 16
-
-    DIVIDER_GAP = 14
-    DIVIDER_OFFSET = 4
+    TOTAL_ITEMS = int(os.getenv("TOTAL_ITEMS", "8"))
 
     TOP_Y = 30
     SCREEN_BOTTOM = 480
 
+    EVENT_DATE_TO_DESC = 26
+    TODO_DATE_TO_DESC = 24
+
+    DIVIDER_GAP = 14
+    DIVIDER_OFFSET = 4
+
     # =========================
-    # TODO 件数
+    # TODO 件数（任意）
     # =========================
     try:
         todo_count = int(os.getenv("TODO_COUNT", "3"))
     except ValueError:
-        todo_count = 3
+        todo_count = 0
 
-    todo_count = max(0, min(todo_count, MAX_TODO))
+    todo_count = max(0, min(todo_count, TOTAL_ITEMS - 1))
+    event_count = TOTAL_ITEMS - todo_count
 
     # =========================
-    # EVENT 件数を高さから決定
+    # 高さ計算（核心）
     # =========================
-    EVENT_MIN_HEIGHT = EVENT_DATE_TO_DESC + EVENT_BLOCK_GAP
+    usable_height = SCREEN_BOTTOM - TOP_Y
 
-    reserved = 0
-    if todo_count > 0:
-        reserved = (
-            DIVIDER_OFFSET
-            + DIVIDER_GAP
-            + todo_count * (TODO_DATE_TO_DESC + TODO_BLOCK_GAP)
-        )
+    item_heights = (
+        event_count * EVENT_DATE_TO_DESC +
+        todo_count * TODO_DATE_TO_DESC
+    )
 
-    available = SCREEN_BOTTOM - TOP_Y - reserved
-    event_fit = available // EVENT_MIN_HEIGHT
+    divider_height = (
+        DIVIDER_OFFSET + DIVIDER_GAP if todo_count > 0 else 0
+    )
 
-    event_limit = min(max(event_fit, BASE_EVENT), MAX_EVENT)
+    flex_height = max(
+        0,
+        usable_height - item_heights - divider_height
+    )
+
+    # EVENT + TODO を同一アイテムとして等間隔配置
+    ITEM_GAP = flex_height // max(TOTAL_ITEMS - 1, 1)
 
     # =========================
     # 日付・時刻
@@ -86,59 +77,47 @@ def main():
     date_fmt = "%-m月 %-d日" if lang == "ja" else "%b %-d"
     time_str = now.strftime("%H:%M")
 
-    time_size = "100px"
-    if len(time_str) > 6:
-        time_size = f"{100 - (len(time_str) - 5) * 5}px"
-
     output_dict = {
-        'TIME_NOW_FONT_SIZE': time_size,
-        'TIME_NOW': time_str,
-        'HOUR_NOW': now.strftime("%H:%M"),
-        'DAY_ONE': now.strftime(date_fmt),
-        'DAY_NAME': now.strftime("%A"),
+        "TIME_NOW": time_str,
+        "HOUR_NOW": time_str,
+        "DAY_ONE": now.strftime(date_fmt),
+        "DAY_NAME": now.strftime("%A"),
     }
 
     # =========================
-    # EVENT 配置（余白再配分込み）
+    # EVENT
     # =========================
-    event_pos, y = calc_event_positions(
-        event_limit, TOP_Y, EVENT_DATE_TO_DESC, EVENT_BLOCK_GAP
-    )
+    y = TOP_Y
 
-    remaining = SCREEN_BOTTOM - y - reserved
+    for i in range(1, event_count + 1):
+        output_dict[f"EVENT_DATE_Y_{i}"] = str(y)
+        output_dict[f"EVENT_DESC_Y_{i}"] = str(y + EVENT_DATE_TO_DESC)
+        y += EVENT_DATE_TO_DESC + ITEM_GAP
 
-    if remaining > 20 and event_limit <= BASE_EVENT:
-        EVENT_BLOCK_GAP += remaining // event_limit
-        event_pos, y = calc_event_positions(
-            event_limit, TOP_Y, EVENT_DATE_TO_DESC, EVENT_BLOCK_GAP
-        )
-
-    for i, (dy, sy) in enumerate(event_pos, start=1):
-        output_dict[f"EVENT_DATE_Y_{i}"] = str(dy)
-        output_dict[f"EVENT_DESC_Y_{i}"] = str(sy)
-
-    for i in range(event_limit + 1, MAX_EVENT + 1):
+    # 未使用 EVENT スロットを消す
+    for i in range(event_count + 1, TOTAL_ITEMS + 1):
         output_dict[f"EVENT_DATE_Y_{i}"] = "0"
         output_dict[f"EVENT_DESC_Y_{i}"] = "0"
         output_dict[f"CAL_DATETIME_{i}"] = ""
         output_dict[f"CAL_DESC_{i}"] = ""
 
     # =========================
-    # Divider / TODO（1回だけ）
+    # Divider / TODO
     # =========================
-    if todo_count == 0:
-        output_dict["DIVIDER_Y"] = "0"
-    else:
-        divider_y = y + DIVIDER_OFFSET
-        output_dict["DIVIDER_Y"] = str(divider_y)
-        y = divider_y + DIVIDER_GAP
+    if todo_count > 0:
+        y += DIVIDER_OFFSET
+        output_dict["DIVIDER_Y"] = str(y)
+        y += DIVIDER_GAP
 
         for i in range(1, todo_count + 1):
             output_dict[f"TODO_DATE_Y_{i}"] = str(y)
             output_dict[f"TODO_DESC_Y_{i}"] = str(y + TODO_DATE_TO_DESC)
-            y += TODO_DATE_TO_DESC + TODO_BLOCK_GAP
+            y += TODO_DATE_TO_DESC + ITEM_GAP
+    else:
+        output_dict["DIVIDER_Y"] = "0"
 
-    for i in range(todo_count + 1, MAX_TODO + 1):
+    # 未使用 TODO スロットを消す
+    for i in range(todo_count + 1, TOTAL_ITEMS + 1):
         output_dict[f"TODO_DATE_Y_{i}"] = "0"
         output_dict[f"TODO_DESC_Y_{i}"] = "0"
         output_dict[f"TODO_DATETIME_{i}"] = ""
@@ -148,8 +127,8 @@ def main():
     # SVG 出力
     # =========================
     logging.info(
-        "Updating SVG %s (EVENT=%d TODO=%d end_y=%d)",
-        template_name, event_limit, todo_count, y
+        "Updating SVG %s (TOTAL=%d EVENT=%d TODO=%d)",
+        template_name, TOTAL_ITEMS, event_count, todo_count
     )
 
     update_svg(
