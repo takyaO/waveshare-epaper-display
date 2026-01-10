@@ -1,4 +1,7 @@
-# ラズパイ＋電子ペーパーで**フォトフレーム ディスプレー**(時刻、天気、カレンダー、予定表)
+# ラズパイで電子フォトフレーム (時刻、天気、カレンダー、予定表)
+
+日本語表示の調整のほか、CalDAVの複数のカレンダーやTODOに対応させ、以下の２つのレイアウトを新たに追加しました。
+
 ## 準備するもの
 - [Raspberry Pi Zero 2 WH](https://amzn.to/44UxA1P)
 - [Waveshare ePaper 7.5 Inch HAT](https://amzn.to/4qunFrT)
