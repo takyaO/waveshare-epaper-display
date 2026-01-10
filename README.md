@@ -13,6 +13,10 @@
 - ePaperが高価
 ![screen-output](screenshots/screen-output.png)
 ![screen-output2](screenshots/screen-output2.png)
+SCREEN_LAYOUT=6
+
+![screen-output2](screenshots/screen-output3.png)
+SCREEN_LAYOUT=7
 
 # About this fork
 I've made the following modifications: 
@@ -20,7 +24,8 @@ I've made the following modifications:
 2. Fixes for caldav (owncloud) features
 3. A new layout with a b/w calendar: SCREEN_LAYOUT=6
 4. Japanese adaptation for date format and AccuWeather description: LANG=ja_JP.utf8
-
+5. Another new layout just for CalDAV EVENTs and TODOs: SCREEN_LAYOUT=7
+ 
 ## purchase
 - [Raspberry Pi Zero 2 WH](https://amzn.to/44UxA1P)
 - [Waveshare ePaper 7.5 Inch HAT](https://amzn.to/4qunFrT)

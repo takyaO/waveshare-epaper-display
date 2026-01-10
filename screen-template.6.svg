@@ -22,7 +22,7 @@
 
    <text id="text3155" x="20" y="155" font-size="37px" style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:37px;line-height:0%;font-family:sans-serif;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;writing-mode:lr-tb;text-anchor:start">DAY_ONE</text>
 <!-- 右側に曜日 -->
-<text id="text_day_name" x="155" y="155" font-size="28px" style="font-weight:bold;font-size:28px;line-height:0%;font-family:sans-serif;fill:#000000;text-anchor:start;">
+<text id="text_day_name" x="165" y="155" font-size="28px" style="font-weight:bold;font-size:28px;line-height:0%;font-family:sans-serif;fill:#000000;text-anchor:start;">
     DAY_NAME
 </text>
 

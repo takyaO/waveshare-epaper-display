@@ -29,10 +29,14 @@ elif [[ $PRIVACY_MODE_LITERATURE_CLOCK = 1 ]]; then
         .venv/bin/python3 display.py screen-literature-clock.png
     fi
 else
+   if [ "$SCREEN_LAYOUT" -eq 7 ]; then
+    .venv/bin/python3 screen-noweather-get.py
+    else
     log "Add weather info"
     if ! .venv/bin/python3 screen-weather-get.py; then
         log "⚠️Error getting weather, stopping."
         exit 1
+    fi
     fi
 
     log "Add Calendar info"
@@ -42,10 +46,18 @@ else
     fi
 
     # Only layout 5 shows a calendar, so save a few seconds.
-    if [[ "$SCREEN_LAYOUT" -ge 5 ]]; then
+    if [[ "$SCREEN_LAYOUT" -eq 5 || "$SCREEN_LAYOUT" -eq 6 ]]; then
         log "Add Calendar month"
         if ! .venv/bin/python3 screen-calendar-month.py; then
             log "⚠️Error getting calendar month info, stopping."
+            exit 1
+        fi
+    fi
+
+    if [[ "$SCREEN_LAYOUT" -eq 7 ]]; then
+        log "Add CalDAV TODO"
+        if ! .venv/bin/python3 screen-todo-get.py; then
+            log "⚠️Error getting CalDAV todo info, stopping."
             exit 1
         fi
     fi

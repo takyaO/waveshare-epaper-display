@@ -83,3 +83,68 @@ class CalDavCalendar(BaseCalendarProvider):
 
         return calendar_events
 
+    def get_calendar_todos(self):
+        """
+        CalDAV から VTODO を取得する
+        """
+        todos = []
+
+        base_url = self.calendar_urls[0]
+
+        with caldav.DAVClient(
+            url=base_url,
+            username=self.username,
+            password=self.password
+        ) as client:
+
+            for url in self.calendar_urls:
+                logging.info(f"Fetching CalDAV todos: {url}")
+                calendar = caldav.Calendar(client, url=url)
+
+                try:
+                    results = calendar.search(
+                        event=False,
+                        todo=True,
+                        include_completed=True,
+                    )
+                except Exception as e:
+                    logging.warning("Failed to fetch VTODOs: %s", e)
+                    continue
+
+                for result in results:
+                    vobj = result.vobject_instance
+                    if not hasattr(vobj, "vtodo"):
+                        continue
+
+                    vtodo = vobj.vtodo
+
+                    summary = str(vtodo.summary.value) if hasattr(vtodo, "summary") else ""
+
+                    due = None
+                    if hasattr(vtodo, "due"):
+                        due = vtodo.due.value
+                        if isinstance(due, date) and not isinstance(due, datetime):
+                            due = datetime.combine(due, time.max)
+
+                    completed = (
+                        hasattr(vtodo, "completed")
+                        or (
+                            hasattr(vtodo, "status")
+                            and str(vtodo.status.value).upper() == "COMPLETED"
+                        )
+                    )
+
+                    todos.append(
+                        type(
+                            "Todo",
+                            (),
+                            {
+                                "summary": summary,
+                                "due": due,
+                                "completed": completed,
+                            },
+                        )()
+                    )
+
+        return todos
+
