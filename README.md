@@ -1,22 +1,23 @@
 # ラズパイ＋電子ペーパーで**フォトフレーム ディスプレー**(時刻、天気、カレンダー、予定表)
-準備するもの
+## 準備するもの
 - [Raspberry Pi Zero 2 WH](https://amzn.to/44UxA1P)
 - [Waveshare ePaper 7.5 Inch HAT](https://amzn.to/4qunFrT)
 - 起動用micro sdメモリ
 - 電源供給用micro USBケーブル
 - フォトフレーム18x13cm（百均サイズ）
 
-メリット
+## メリット
 - 低電力（モバイルバッテリー駆動可）
 
-デメリット
+## デメリット
 - ePaperが高価
+
+## SCREEN_LAYOUT=6
 ![screen-output](screenshots/screen-output.png)
 ![screen-output2](screenshots/screen-output2.png)
-SCREEN_LAYOUT=6
 
+## SCREEN_LAYOUT=7
 ![screen-output3](screenshots/screen-output3.png)
-SCREEN_LAYOUT=7
 
 # About this fork
 I've made the following modifications: 
