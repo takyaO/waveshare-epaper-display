@@ -15,7 +15,7 @@
 ![screen-output2](screenshots/screen-output2.png)
 SCREEN_LAYOUT=6
 
-![screen-output2](screenshots/screen-output3.png)
+![screen-output3](screenshots/screen-output3.png)
 SCREEN_LAYOUT=7
 
 # About this fork
