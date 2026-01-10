@@ -30,7 +30,13 @@ elif [[ $PRIVACY_MODE_LITERATURE_CLOCK = 1 ]]; then
     fi
 else
    if [ "$SCREEN_LAYOUT" -eq 7 ]; then
-    .venv/bin/python3 screen-noweather-get.py
+
+        log "Add CalDAV TODO"
+        TODO_COUNT=$(.venv/bin/python3 screen-todo-get.py)
+        export TODO_COUNT=${TODO_COUNT:-3}
+        .venv/bin/python3 screen-noweather-get.py
+        echo "DEBUG TODO_COUNT=[$TODO_COUNT]"
+
     else
     log "Add weather info"
     if ! .venv/bin/python3 screen-weather-get.py; then
@@ -50,14 +56,6 @@ else
         log "Add Calendar month"
         if ! .venv/bin/python3 screen-calendar-month.py; then
             log "⚠️Error getting calendar month info, stopping."
-            exit 1
-        fi
-    fi
-
-    if [[ "$SCREEN_LAYOUT" -eq 7 ]]; then
-        log "Add CalDAV TODO"
-        if ! .venv/bin/python3 screen-todo-get.py; then
-            log "⚠️Error getting CalDAV todo info, stopping."
             exit 1
         fi
     fi

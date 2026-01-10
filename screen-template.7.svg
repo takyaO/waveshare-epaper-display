@@ -4,67 +4,83 @@
 
   <rect width="800" height="480" fill="white"/>
 
-  <!-- ===== VEVENT (4 items) ===== -->
+  <!-- ===== VEVENT (max 6) ===== -->
 
   <!-- Event 1 -->
-  <text x="20" y="30" font-size="18px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="EVENT_DATE_Y_1" font-size="18px" font-weight="bold">
     CAL_DATETIME_1
   </text>
-  <text x="20" y="60" font-size="26px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="EVENT_DESC_Y_1" font-size="26px" font-weight="bold">
     CAL_DESC_1
   </text>
 
   <!-- Event 2 -->
-  <text x="20" y="100" font-size="18px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="EVENT_DATE_Y_2" font-size="18px" font-weight="bold">
     CAL_DATETIME_2
   </text>
-  <text x="20" y="130" font-size="26px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="EVENT_DESC_Y_2" font-size="26px" font-weight="bold">
     CAL_DESC_2
   </text>
 
   <!-- Event 3 -->
-  <text x="20" y="170" font-size="18px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="EVENT_DATE_Y_3" font-size="18px" font-weight="bold">
     CAL_DATETIME_3
   </text>
-  <text x="20" y="200" font-size="26px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="EVENT_DESC_Y_3" font-size="26px" font-weight="bold">
     CAL_DESC_3
   </text>
 
   <!-- Event 4 -->
-  <text x="20" y="240" font-size="18px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="EVENT_DATE_Y_4" font-size="18px" font-weight="bold">
     CAL_DATETIME_4
   </text>
-  <text x="20" y="270" font-size="26px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="EVENT_DESC_Y_4" font-size="26px" font-weight="bold">
     CAL_DESC_4
   </text>
 
-  <!-- Divider -->
-  <line x1="20" y1="300" x2="780" y2="300"
+  <!-- Event 5 -->
+  <text x="20" y="EVENT_DATE_Y_5" font-size="18px" font-weight="bold">
+    CAL_DATETIME_5
+  </text>
+  <text x="20" y="EVENT_DESC_Y_5" font-size="26px" font-weight="bold">
+    CAL_DESC_5
+  </text>
+
+  <!-- Event 6 -->
+  <text x="20" y="EVENT_DATE_Y_6" font-size="18px" font-weight="bold">
+    CAL_DATETIME_6
+  </text>
+  <text x="20" y="EVENT_DESC_Y_6" font-size="26px" font-weight="bold">
+    CAL_DESC_6
+  </text>
+
+  <!-- Divider (Yは動的、線自体はPythonでON/OFF) -->
+  <line x1="20" y1="DIVIDER_Y" x2="780" y2="DIVIDER_Y"
         stroke="black" stroke-width="2"/>
 
-  <!-- ===== TODO (3 items) ===== -->
+  <!-- ===== TODO (max 3) ===== -->
 
   <!-- TODO 1 -->
-  <text x="20" y="330" font-size="18px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="TODO_DATE_Y_1" font-size="18px" font-weight="bold">
     TODO_DATETIME_1
   </text>
-  <text x="20" y="360" font-size="26px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="TODO_DESC_Y_1" font-size="26px" font-weight="bold">
     TODO_DESC_1
   </text>
 
   <!-- TODO 2 -->
-  <text x="20" y="382" font-size="18px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="TODO_DATE_Y_2" font-size="18px" font-weight="bold">
     TODO_DATETIME_2
   </text>
-  <text x="20" y="412" font-size="26px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="TODO_DESC_Y_2" font-size="26px" font-weight="bold">
     TODO_DESC_2
   </text>
 
   <!-- TODO 3 -->
-  <text x="20" y="434" font-size="18px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="TODO_DATE_Y_3" font-size="18px" font-weight="bold">
     TODO_DATETIME_3
   </text>
-  <text x="20" y="464" font-size="26px" font-weight="bold" font-family="sans-serif">
+  <text x="20" y="TODO_DESC_Y_3" font-size="26px" font-weight="bold">
     TODO_DESC_3
   </text>
 

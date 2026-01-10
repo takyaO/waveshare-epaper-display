@@ -72,6 +72,7 @@ def get_formatted_todos(todos: list) -> dict:
     return output
 
 def main():
+    input_svg_filename = "screen-output-base.svg"
     output_svg_filename = "screen-output-weather.svg"
 
     provider = CalDavCalendar(
@@ -111,8 +112,11 @@ def main():
         )
 
     logging.info("Updating SVG with %d todos", len(todos))
-    update_svg(output_svg_filename, output_svg_filename, output_dict)
+    update_svg(input_svg_filename, output_svg_filename, output_dict)
 
+    os.environ["TODO_COUNT"] = str(len(todos))
+    return len(todos)
 
 if __name__ == "__main__":
-    main()
+    count = main()
+    print(count)
