@@ -54,6 +54,22 @@
     CAL_DESC_6
   </text>
 
+  <!-- Event 7 -->
+  <text x="20" y="EVENT_DATE_Y_7" font-size="18px" font-weight="bold">
+    CAL_DATETIME_7
+  </text>
+  <text x="20" y="EVENT_DESC_Y_7" font-size="26px" font-weight="bold">
+    CAL_DESC_7
+  </text>
+
+  <!-- Event 8 -->
+  <text x="20" y="EVENT_DATE_Y_8" font-size="18px" font-weight="bold">
+    CAL_DATETIME_8
+  </text>
+  <text x="20" y="EVENT_DESC_Y_8" font-size="26px" font-weight="bold">
+    CAL_DESC_8
+  </text>
+
   <!-- Divider (Yは動的、線自体はPythonでON/OFF) -->
   <line x1="20" y1="DIVIDER_Y" x2="780" y2="DIVIDER_Y"
         stroke="black" stroke-width="2"/>
