@@ -1,5 +1,6 @@
 import logging
 import datetime
+import os
 from weather_providers.base_provider import BaseWeatherProvider
 
 
@@ -9,7 +10,8 @@ class VisualCrossing(BaseWeatherProvider):
         self.location_lat = location_lat
         self.location_long = location_long
         self.units = units
-
+        lang_env = os.getenv("LANG", "").lower()
+        self.language = "ja" if lang_env.startswith("ja") else "en"
     # Map VisualCrossing icons to local icons
     # Reference: https://www.visualcrossing.com/resources/documentation/weather-api/defining-icon-set-in-the-weather-api/
     def get_icon_from_visualcrossing_weathercode(self, weathercode, is_daytime):
@@ -37,8 +39,8 @@ class VisualCrossing(BaseWeatherProvider):
     # https://www.visualcrossing.com/resources/documentation/weather-api/timeline-weather-api/
     def get_weather(self):
 
-        url = ("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{},{}?unitGroup={}&key={}&include=fcst,alerts"
-               .format(self.location_lat, self.location_long, "us" if self.units != "metric" else "metric", self.visualcrossing_apikey))
+        url = ("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{},{}?unitGroup={}&key={}&include=fcst,alerts&lang={}"
+               .format(self.location_lat, self.location_long, "us" if self.units != "metric" else "metric", self.visualcrossing_apikey, self.language))
 
         response_data = self.get_response_json(url)
 
@@ -50,13 +52,21 @@ class VisualCrossing(BaseWeatherProvider):
 
         logging.debug("get_weather() - {}".format(weather_data))
 
-        daytime = self.is_daytime(self.location_lat, self.location_long)
+        current_hour_int = datetime.datetime.now().hour
+        
+        # 6時から18時までを「昼」とする
+        daytime = 6 <= current_hour_int < 18
+        
+        # ログで判定を確認できるようにする
+        logging.info("VisualCrossing check - Hour: {}, Is Daytime: {}".format(current_hour_int, daytime))
+
+#        daytime = self.is_daytime(self.location_lat, self.location_long)
 
         # { "temperatureMin": "2.0", "temperatureMax": "15.1", "icon": "mostly_cloudy", "description": "Cloudy with light breezes" }
         weather = {}
         weather["temperatureMin"] = weather_data["tempmin"]
         weather["temperatureMax"] = weather_data["tempmax"]
         weather["icon"] = self.get_icon_from_visualcrossing_weathercode(weather_data["icon"], daytime)
-        weather["description"] = weather_data["description"]
+        weather["description"] = weather_data["conditions"]
         logging.debug(weather)
         return weather

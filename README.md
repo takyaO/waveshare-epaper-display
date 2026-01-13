@@ -27,7 +27,7 @@ I've made the following modifications:
 1. Import MULTIPLE caldav (owncloud) calendars: CALDAV_CALENDAR_URLS
 2. Fixes for caldav (owncloud) features
 3. A new layout with a b/w calendar: SCREEN_LAYOUT=6
-4. Japanese adaptation for date format and AccuWeather description: LANG=ja_JP.utf8
+4. Japanese adaptation for date format and AccuWeather/VisualCrossing description: LANG=ja_JP.utf8
 5. Another new layout just for CalDAV EVENTs and TODOs: SCREEN_LAYOUT=7
  
 ## purchase
