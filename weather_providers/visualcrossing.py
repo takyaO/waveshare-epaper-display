@@ -39,7 +39,7 @@ class VisualCrossing(BaseWeatherProvider):
     # https://www.visualcrossing.com/resources/documentation/weather-api/timeline-weather-api/
     def get_weather(self):
 
-        url = ("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{},{}?unitGroup={}&key={}&include=fcst,alerts&lang={}"
+        url = ("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{},{}?unitGroup={}&key={}&include=fcst&lang={}"
                .format(self.location_lat, self.location_long, "us" if self.units != "metric" else "metric", self.visualcrossing_apikey, self.language))
 
         response_data = self.get_response_json(url)

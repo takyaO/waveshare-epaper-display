@@ -4,6 +4,7 @@ import datetime
 import os
 import logging
 import locale
+import sys
 
 from utility import update_svg, configure_logging, configure_locale
 
@@ -27,7 +28,7 @@ def main():
     # =========================
     # 支配パラメータ
     # =========================
-    TOTAL_ITEMS = int(os.getenv("TOTAL_ITEMS", "8"))
+    total_items = 8
 
     TOP_Y = 30
     SCREEN_BOTTOM = 480
@@ -42,12 +43,12 @@ def main():
     # TODO 件数（任意）
     # =========================
     try:
-        todo_count = int(os.getenv("TODO_COUNT", "3"))
+        todo_count = int(sys.argv[1]) if len(sys.argv) > 1 else 3
     except ValueError:
         todo_count = 0
 
-    todo_count = max(0, min(todo_count, TOTAL_ITEMS - 1))
-    event_count = TOTAL_ITEMS - todo_count
+    todo_count = max(0, min(todo_count, total_items - 1))
+    event_count = total_items - todo_count
 
     # =========================
     # 高さ計算（核心）
@@ -69,7 +70,7 @@ def main():
     )
 
     # EVENT + TODO を同一アイテムとして等間隔配置
-    ITEM_GAP = flex_height // max(TOTAL_ITEMS - 1, 1)
+    ITEM_GAP = flex_height // max(total_items - 1, 1)
 
     # =========================
     # 日付・時刻
@@ -95,7 +96,7 @@ def main():
         y += EVENT_DATE_TO_DESC + ITEM_GAP
 
     # 未使用 EVENT スロットを消す
-    for i in range(event_count + 1, TOTAL_ITEMS + 1):
+    for i in range(event_count + 1, total_items + 1):
         output_dict[f"EVENT_DATE_Y_{i}"] = "0"
         output_dict[f"EVENT_DESC_Y_{i}"] = "0"
         output_dict[f"CAL_DATETIME_{i}"] = ""
@@ -117,7 +118,7 @@ def main():
         output_dict["DIVIDER_Y"] = "0"
 
     # 未使用 TODO スロットを消す
-    for i in range(todo_count + 1, TOTAL_ITEMS + 1):
+    for i in range(todo_count + 1, total_items + 1):
         output_dict[f"TODO_DATE_Y_{i}"] = "0"
         output_dict[f"TODO_DESC_Y_{i}"] = "0"
         output_dict[f"TODO_DATETIME_{i}"] = ""
@@ -128,7 +129,7 @@ def main():
     # =========================
     logging.info(
         "Updating SVG %s (TOTAL=%d EVENT=%d TODO=%d)",
-        template_name, TOTAL_ITEMS, event_count, todo_count
+        template_name, total_items, event_count, todo_count
     )
 
     update_svg(
@@ -140,4 +141,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

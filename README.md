@@ -27,7 +27,7 @@ I've made the following modifications:
 1. Import MULTIPLE caldav (owncloud) calendars: CALDAV_CALENDAR_URLS
 2. Fixes for caldav (owncloud) features
 3. A new layout with a b/w calendar: SCREEN_LAYOUT=6
-4. Japanese adaptation for date format and AccuWeather/VisualCrossing description: LANG=ja_JP.utf8
+4. Japanese adaptation for date format and VisualCrossing description: LANG=ja_JP.utf8
 5. Another new layout just for CalDAV EVENTs and TODOs: SCREEN_LAYOUT=7
  
 ## purchase
@@ -43,14 +43,12 @@ sudo apt install python3-lxml python3-pillow
 python3 -m venv .venv --system-site-packages
 source .venv/bin/activate
 pip install -r requirements.txt
-pip install pytz astral humanize emoji caldav google_auth_oauthlib google-api-python-client icalevents msal cairosvg drawsvg
 ```
 
 ## env.sh
 
 ```
-export ACCUWEATHER_APIKEY=xxxxxxxxxxxxxxxxxxxxx
-export ACCUWEATHER_LOCATIONKEY=226090
+export VISUALCROSSING_APIKEY=xxxxxxxxxxxxxxxxxxxxx
 export WEATHER_LATITUDE=34.7144192
 export WEATHER_LONGITUDE=137.7140736 
 export WEATHER_FORMAT=CELSIUS
@@ -65,10 +63,12 @@ export CALDAV_USERNAME=xxxxxxxxx
 export CALDAV_PASSWORD=xxxxxxxxx
 
 export WAVESHARE_EPD75_VERSION=2
-
 export SCREEN_LAYOUT=6
+export WEATHER_TTL=3600
 export LANG=ja_JP.utf8
-#export LANG=en_US.utf8
+export LOG_LEVEL=INFO
+export PRIVACY_MODE_XKCD=0
+export PRIVACY_MODE_LITERATURE_CLOCK=0
 ```
 
 
@@ -85,26 +85,7 @@ The screen will display date, time, weather icon with high and low, and calendar
 - [Setup the PI](#setup-the-pi)
 - [Using this application](#using-this-application)
 - [Setup dependencies](#setup-dependencies)
-- [Set your location](#set-your-location)
-- [Pick a Weather provider](#pick-a-weather-provider)
-  - [OpenWeatherMap](#openweathermap)
-  - [Met Office (UK)](#met-office-uk)
-  - [AccuWeather](#accuweather)
-  - [Met.no](#metno)
-  - [Met Éireann (Ireland)](#met-éireann-ireland)
-  - [Weather.gov (US)](#weathergov-us)
-  - [Climacell (tomorrow.io)](#climacell-tomorrowio)
-  - [VisualCrossing](#visualcrossing)
-  - [SMHI (Sweden)](#smhi-sweden)
-- [Pick a severe weather warning provider](#pick-a-severe-weather-warning-provider)
-  - [Met Office (UK)](#met-office-uk-1)
-  - [Weather.gov (US)](#weathergov-us-1)
-  - [Met Éireann (Ireland)](#met-éireann-ireland-1)
-- [Pick a Calendar provider](#pick-a-calendar-provider)
-  - [Google Calendar](#google-calendar)
-  - [Outlook Calendar](#outlook-calendar)
-  - [ICS Calendar](#ics-calendar)
-  - [CalDav Calendar](#caldav-calendar)
+- [Weather and calendar configuration](#weather-and-calendar-configuration)
 - [Pick a layout](#pick-a-layout)
 - [Run it](#run-it)
   - [Automate it](#automate-it)
@@ -174,192 +155,22 @@ Modify the `env.sh` file and set the version of your Waveshare 7.5" e-Paper Modu
 
     export WAVESHARE_EPD75_VERSION=2
 
-## Set your location
+## Weather and calendar configuration
 
-Whichever weather provider you use, you'll need to provide the location and units to display in.
+The display uses [VisualCrossing](https://www.visualcrossing.com/) for weather. Set its API key, your location, and temperature format in `env.sh`:
 
-Modify the `env.sh` file and update with the latitude and longitude of your location.
-As needed, change the temperature format (CELSIUS or FAHRENHEIT).
-
-    export WEATHER_LATITUDE=51.3656
-    export WEATHER_LONGITUDE=0.1963
+    export VISUALCROSSING_APIKEY=your-api-key
+    export WEATHER_LATITUDE=34.7144192
+    export WEATHER_LONGITUDE=137.7140736
     export WEATHER_FORMAT=CELSIUS
 
-## Pick a Weather provider
+Calendar events and TODOs are read from CalDAV. Set one or more calendar URLs, separated by whitespace, along with the account credentials:
 
-You can pick between OpenWeatherMap, Met Office, AccuWeather, Met.no, Weeather.gov, VisualCrossing, and Climacell to provide temperature and weather forecasts.
-You can switch between them too, by providing the keys and commenting out other ones, but remember to delete the `cache_weather.json` if you switch weather providers.
-
-### OpenWeatherMap
-
-Register on the [OpenWeathermap](https://openweathermap.org) website, and go to the [API Keys page](https://home.openweathermap.org/api_keys), that's the key you'll need.
-Add it to the env.sh file.
-
-    export OPENWEATHERMAP_APIKEY=xxxxxx
-
-### Met Office (UK)
-
-Create an account [on the Met Office Weather DataHub](https://datahub.metoffice.gov.uk) site.
-Next, [under subscriptions](https://datahub.metoffice.gov.uk/profile/subscriptions) - subscribe to the 'Site Specific' product 'Global Spot'. This will get you an API key. 
-
-Add the API key to the env.sh file:
-
-    export METOFFICEDATAHUB_API_KEY=eyJ.........
-
-### AccuWeather
-
-Register on the [AccuWeather](https://developer.accuweather.com/) site.
-Next, [register a new application](https://developer.accuweather.com/user/me/apps).
-I just named it Personal, marked it as Limited Trial, Internal App, Business to Consumer.
-Once you do this you'll get an API Key, save it.
-
-You'll also need an AccuWeather Location Key.
-Do a normal [AccuWeather search](https://www.accuweather.com/) for your location.
-The last number in the URL is the Location Key.  In the example of [London](https://www.accuweather.com/en/gb/london/ec4a-2/weather-forecast/328328), it's `328328`.
-
-Add the API Key and Location Key to the `env.sh`.
-
-    export ACCUWEATHER_APIKEY=xxxxxx
-    export ACCUWEATHER_LOCATIONKEY=328328
-
-### Met.no
-
-Met.no's [Terms of Service](https://api.met.no/doc/TermsOfService) requires you to identify yourself.  The purpose is to ensure they can contact you in case you overload or abuse their servers.  For this reason, you just need to set your email address in `env.sh` like so:
-
-    export METNO_SELF_IDENTIFICATION=you@example.com
-
-Note that the Met.no API provides 6 hours of forecast, rather than a full day.
-
-### Met Éireann (Ireland)
-
-[Met Éireann](https://www.met.ie/) publish their forecast data under a [Creative Commons Attribution 4.0 International license (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).  All you need to do to use it is to uncomment this line in `env.sh`:
-
-    export WEATHER_MET_EIREANN=1
-
-Note that a condition of use of this data is that weather alerts be displayed, so ALERT_MET_EIREANN_FEED_URL should be uncommented, too.
-
-### Weather.gov (US)
-
-Weather.gov requires you to [identify your application](https://www.weather.gov/documentation/services-web-api).  This can be any made up string, or an email address.
-Set its value in the `env.sh` as shown:
-
-    export WEATHERGOV_SELF_IDENTIFICATION=you@example.com
-
-Warning: YMMV. During my testing, I found the weather.gov API would start returning errors and then suddenly work again.
-
-### Climacell (tomorrow.io)
-
-Register on the [Climacell site](https://www.climacell.co/weather-api/), and when you do you should be given an API Key.
-Modify the `env.sh` file and put your Climacell API key in there.
-
-    export CLIMACELL_APIKEY=xxxxxx
-
-### VisualCrossing
-
-Register on [VisualCrossing](https://www.visualcrossing.com/). Under Account Details, you should be able to generate an API key. Once you have that, simply add it to `env.sh` as shown:
-
-    export VISUALCROSSING_APIKEY=XXXXXXXXXXXXXXXXXXXXXX
-
-### SMHI (Sweden)
-
-SMHI requires you to identify yourself.  Just set your own email,
-
-    export SMHI_SELF_IDENTIFICATION=you@example.com
-
-## Pick a severe weather warning provider
-
-This is an optional step.  By doing nothing you simply won't see severe weather warnings.
-
-### Met Office (UK)
-
-Go to the [Met Office RSS Feeds page](https://www.metoffice.gov.uk/weather/guides/rss) and copy the URL of the RSS feed based on your region.
-Set its value in the `env.sh` as shown below. For example, London would be:
-
-    export ALERT_METOFFICE_FEED_URL=https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/se
-
-### Weather.gov (US)
-
-Weather.gov requires you to [identify your application](https://www.weather.gov/documentation/services-web-api).  This can be any made up string, or an email address.
-Set its value in the `env.sh` as shown:
-
-    export ALERT_WEATHERGOV_SELF_IDENTIFICATION=you@example.com
-
-This provider will use the same latitude and longitude as specified for the weather provider.
-
-Warning: YMMV. During my testing, I found the weather.gov API would start returning errors and then suddenly work again.
-
-### Met Éireann (Ireland)
-
-To use alerts from Met Éireann, visit  https://www.met.ie/Open_Data/json/ and choose the appropriate "warning_EIXX" JSON file for your region, using each county's FIPS code.  This code can be found in the table on http://www.statoids.com/uie.html,
-in the pre-2014 section.  For example, this is the file for Dublin:
-
-    export ALERT_MET_EIREANN_FEED_URL=https://www.met.ie/Open_Data/json/warning_EI07.json
-
-## Pick a Calendar provider
-
-You can use Google Calendar or Outlook Calendar to display events.
-
-### Google Calendar
-
-The script will by default get its info from your primary Google Calendar.  If you need to pick a specific calendar you will need its ID.  To get its ID, open up [Google Calendar](https://calendar.google.com) and go to the settings for your preferred calendar.  Under the 'Integrate Calendar' section you will see a Calendar ID which looks like `xyz12345@group.calendar.google.com`.  Set that value in `env.sh`
-
-```bash
-export GOOGLE_CALENDAR_ID=xyz12345@group.calendar.google.com
-```
-
-#### Get a Google Calendar token
-
-You will need to run an Oauth process once manually to allow the Python code to get a token, which lets it query Google Calendar for information.
-
-Run:
-
-    .venv/bin/python3 screen-calendar-get.py
-
-The script will prompt you to visit a URL in your browser, then it will sit there and wait. The URL will look like `https://accounts.google.com/o/...` and will be very long.  
-
-Follow that URL in a browser window, you'll need to log in and choose your Google account.   
-On the "Make sure you trust Mendhak Waveshare Epaper Display" screen, you will see it's asking for permission to read your Google Calendar.  
-Click continue, and then let it fail when it tries to go to a `http://localhost:8080/...` URL.  
-
-Copy the URL it was trying to go to (eg: http://localhost:8080/...) and in another SSH session with the Raspberry Pi, run this (remember the double quotes): 
-
-    curl "http://localhost:8080/..."
-
-On the first screen you should see the auth flow complete, and a new `token.pickle` file appears.   
-The script should now be able to run in the future without prompting required.
-
-
-### Outlook Calendar
-
-The setup is much simpler, just run this script which will give instructions on how to login:
-
-    .venv/bin/python3 outlook_util.py
-
-Login with the Microsoft account you want to get the calendar from, and accept the consent screen.
-After a moment, the script will then display a set of Calendar IDs and some sample events from those Calendars.
-Copy the ID of the calendar you want, and add it to env.sh like so:
-
-    export OUTLOOK_CALENDAR_ID=AQMkAxyz...
-
-Note that if you set an Outlook Calendar ID, the Google Calendar will be ignored.
-
-### ICS Calendar
-
-ICS is simple, get the ICS URL for a calendar, and place it in `env.sh`.
-
-    export ICS_CALENDAR_URL=https://calendar.google.com/calendar/ical/xxxxxxxxxxxx/xxxxxxxxxxxxxx/basic.ics
-
-There is no username/password support.
-
-### CalDav Calendar
-
-For CalDav you will need the CalDav URL, username, and password.
-
-    export CALDAV_CALENDAR_URL=https://nextcloud.example.com/remote.php/dav/principals/users/123456/
+    export CALDAV_CALENDAR_URLS="https://example.com/dav/calendar/"
     export CALDAV_USERNAME=username
     export CALDAV_PASSWORD=password
 
-Some CalDav features may not work well as the protocol is heavily undocumented, proprietary, and many servers don't implement it the same way.
+If `CALDAV_CALENDAR_URLS` is empty, the display simply omits calendar events and TODOs. Google Calendar, ICS, Outlook, alternate weather providers, and weather alerts are not supported by this configuration.
 
 ## Pick a layout
 
@@ -383,7 +194,7 @@ This is an optional step.  There are a few different layouts to choose from.
 
 ## Run it
 
-Run `./run.sh` which should query the weather provider and Google/Outlook Calendar.  It will then create a png, convert to a 1-bit black and white bmp, then display the bmp on screen.
+Run `./run.sh` to fetch VisualCrossing weather and, when configured, CalDAV events and TODOs.  It will then create a png, convert to a 1-bit black and white bmp, then display the bmp on screen.
 
 Using a 1-bit, low grade BMP is what allows the screen to refresh relatively quickly. Calling the BCM code to do it takes about 6 seconds.
 Rendering a high quality PNG or JPG and rendering to screen with Python takes about 35 seconds.
@@ -517,10 +328,8 @@ You may want to further troubleshoot if you're seeing or not seeing something ex
 If you've set up the cron job as shown above, a `run.log` file will appear which contains some info and errors.
 If there isn't enough information in there, you can set `export LOG_LEVEL=DEBUG` in the `env.sh` and the `run.log` will contain even more information.
 
-The scripts cache the calendar and weather information, to avoid hitting weather API rate limits.
+The weather response is cached to avoid hitting the weather API unnecessarily.
 If you want to force a weather update, you can delete the `cache_weather.json`.
-If you want to force a calendar update, you can delete the `cache_calendar.pickle` or `cache_outlookcalendar.pickle`.
-If you want to force a re-login to Google or Outlook, delete the `token.pickle` or `outlooktoken.bin`.
 
 
 ## Waveshare documentation and sample code

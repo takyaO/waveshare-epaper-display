@@ -7,8 +7,6 @@ import emoji
 import locale
 from xml.sax.saxutils import escape
 from datetime import timezone
-
-from calendar_providers.caldav import CalDavCalendar
 from utility import (
     update_svg,
     configure_logging,
@@ -75,17 +73,20 @@ def main():
     input_svg_filename = "screen-output-base.svg"
     output_svg_filename = "screen-output-weather.svg"
 
-    provider = CalDavCalendar(
-        caldav_calendar_urls,
-        max_todo_results,
-        None,
-        None,
-        caldav_username,
-        caldav_password,
-    )
+    if caldav_calendar_urls:
+        from calendar_providers.caldav import CalDavCalendar
 
-    # === VTODO only ===
-    todos = provider.get_calendar_todos()
+        provider = CalDavCalendar(
+            caldav_calendar_urls,
+            max_todo_results,
+            None,
+            None,
+            caldav_username,
+            caldav_password,
+        )
+        todos = provider.get_calendar_todos()
+    else:
+        todos = []
 
     # 未完了のみ + 期限順
     todos = [
@@ -114,7 +115,6 @@ def main():
     logging.info("Updating SVG with %d todos", len(todos))
     update_svg(input_svg_filename, output_svg_filename, output_dict)
 
-    os.environ["TODO_COUNT"] = str(len(todos))
     return len(todos)
 
 if __name__ == "__main__":

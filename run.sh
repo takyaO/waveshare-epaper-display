@@ -32,10 +32,10 @@ else
    if [ "$SCREEN_LAYOUT" -eq 7 ]; then
 
         log "Add CalDAV TODO"
-        TODO_COUNT=$(.venv/bin/python3 screen-todo-get.py)
-        export TODO_COUNT=${TODO_COUNT:-3}
-        .venv/bin/python3 screen-noweather-get.py
-        echo "DEBUG TODO_COUNT=[$TODO_COUNT]"
+        todo_count=$(.venv/bin/python3 screen-todo-get.py)
+        todo_count=${todo_count:-3}
+        .venv/bin/python3 screen-noweather-get.py "$todo_count"
+        echo "DEBUG TODO_COUNT=[$todo_count]"
 
     else
     log "Add weather info"

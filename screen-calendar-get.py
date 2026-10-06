@@ -6,15 +6,9 @@ import locale #
 from xml.sax.saxutils import escape
 
 from calendar_providers.base_provider import CalendarEvent
-from calendar_providers.caldav import CalDavCalendar
-from calendar_providers.google import GoogleCalendar
-from calendar_providers.ics import ICSCalendar
-from calendar_providers.outlook import OutlookCalendar
 from utility import (
-    get_formatted_time,
     update_svg,
     configure_logging,
-    get_formatted_date,
     configure_locale,
 )
 
@@ -23,12 +17,9 @@ configure_logging()
 
 max_event_results = 10
 
-google_calendar_id = os.getenv("GOOGLE_CALENDAR_ID", "primary")
-outlook_calendar_id = os.getenv("OUTLOOK_CALENDAR_ID")
 caldav_calendar_urls = os.getenv("CALDAV_CALENDAR_URLS", "").split()
 caldav_username = os.getenv("CALDAV_USERNAME")
 caldav_password = os.getenv("CALDAV_PASSWORD")
-ics_calendar_url = os.getenv("ICS_CALENDAR_URL")
 
 def get_active_locale():
     """現在の環境の言語コード(ja, en等)を返す"""
@@ -128,23 +119,17 @@ def main():
     
     now = datetime.datetime.now().astimezone()
     
-    if os.getenv("CALENDAR_INCLUDE_PAST_EVENTS_FOR_TODAY", "0") == "1":
-        today_start_time = datetime.datetime.combine(now.date(), datetime.time.min).astimezone(now.tzinfo)
-    else:
-        today_start_time = now
+    today_start_time = now
 
     oneyearlater_iso = now + datetime.timedelta(days=365)
 
-    if outlook_calendar_id:
-        provider = OutlookCalendar(outlook_calendar_id, max_event_results, today_start_time, oneyearlater_iso)
-    elif caldav_calendar_urls:
-        provider = CalDavCalendar(caldav_calendar_urls, max_event_results, today_start_time, oneyearlater_iso, caldav_username, caldav_password)
-    elif ics_calendar_url:
-        provider = ICSCalendar(ics_calendar_url, max_event_results, today_start_time, oneyearlater_iso)
-    else:
-        provider = GoogleCalendar(google_calendar_id, max_event_results, today_start_time, oneyearlater_iso)
+    if caldav_calendar_urls:
+        from calendar_providers.caldav import CalDavCalendar
 
-    calendar_events = provider.get_calendar_events()
+        provider = CalDavCalendar(caldav_calendar_urls, max_event_results, today_start_time, oneyearlater_iso, caldav_username, caldav_password)
+        calendar_events = provider.get_calendar_events()
+    else:
+        calendar_events = []
     
     filtered_events = []
     for e in calendar_events:
